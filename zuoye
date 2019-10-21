@@ -1,0 +1,152 @@
+#include<fstream>
+#include<iostream>
+#include<string>
+#include<vector>
+using namespace std;
+
+class WC
+{
+private:
+ string filename; 
+ vector <string> text; 
+ vector <string> order; 
+	int ordern;  
+	long charn; 
+	int linen; 
+	int wordn; 
+	int Sentn; 
+ 	int Elinen; 
+	int Dlinen; 
+public:
+	bool Init(vector<string>& messagelist); 
+	void Basecount();    
+	void Output(); 
+};
+bool WC::Init(vector<string>& messagelist)
+{
+	if (messagelist[0] != "wc.exe")
+	{
+ cout << "Please enter wc.exe first if you want to use the Word_Count." << endl;
+		return false;
+	}
+	int n = messagelist.size();
+	this->filename = messagelist[n - 1];
+	for (int i = 1 ; i < n - 1; i++)
+		this->order.push_back( messagelist[i]) ; 
+ ordern = order.size();                                         
+ charn = 0;
+ wordn = 0;
+ linen = 0;
+ Sentn = 0;
+ Elinen = 0;
+ Dlinen = 0;
+ ifstream infile("filename", ios::ate);
+	if (!infile)
+	{
+ cerr << "Open error! Please check the filename." << endl;
+		return false;
+	}
+ charn = infile.tellg();  
+ infile.seekg(0);  
+ string line; 
+	while (getline(infile, line))
+	{
+ text.push_back(line);
+ linen++;
+		if (line.length() == 0) Elinen++;
+	}
+ infile.close();
+	return true;
+}
+void WC::Basecount()
+{
+	
+ string line; 
+	for (int l = 0; l < linen; l++)
+	{
+ line = text[l];
+		unsigned int e = 0; 
+		unsigned int b = 0; 
+		for (e = 0, b=0; e < line.length(); e++)
+		{
+			if ((line[e] == ' ' || line[e] == '.' || line[e] == '!' || line[e] == '?') && line[b] != ' ')
+			{
+ wordn++;
+			}
+			if (line[e] == '.' || line[e] == '!' || line[e] == '?')
+			{
+ Sentn++;
+			}
+			if ((line[e] == '/' )&& (line[e+1] == '/' || line[e+1] == '*'))
+			{
+ Dlinen++;
+			}
+ b = e;
+		}
+	}
+}
+void WC::Output()
+{
+	for (int i = 0; i < ordern; i++)
+	{
+		if (order[i] == "-c" || order[i] == "-C")
+ cout << "Character number : " << charn << endl;
+		else if (order[i] == "-w" || order[i] == "-W")
+ cout << "Word number : " << wordn << endl;
+		else if (order[i] == "-l" || order[i] == "-L")
+ cout << "Line number : " << linen << endl;
+		else if (order[i] == "-s" || order[i] == "-S")
+ cout << "Sentence number : " << Sentn << endl;
+		else if (order[i] == "-e" || order[i] == "-E")
+ cout << "Empty line number : " << Elinen << endl;
+		else if (order[i] == "-d" || order[i] == "-D")
+ cout << "Definition line number : " << Dlinen << endl;
+		else
+ cout << order[i] << " is not defined in this program." << endl;
+
+	}
+}
+void Splitmessage(vector<string>&,string);
+int main()
+{
+ cout << "WORD COUnTER v1.3"<< endl;
+ vector <string> orderlist;
+ string message="Begin";
+	while (1)                          
+	{
+ WC file; 
+ orderlist.clear();
+		getline(cin, message);
+		if (message.length() == 0) continue; 
+		if (message == "exit" || message == "quit") break; 
+		Splitmessage(orderlist,message);
+		if (!file.Init(orderlist))
+			continue;
+ file.Basecount();
+ file.Output();
+	}
+    return 0;
+}
+
+void Splitmessage(vector <string>&orderlist, string message)
+{
+	int b=0;
+	int e=0; 
+	int lenth = message.length();
+	for (e = 0; e< lenth; e++)
+	{
+		if (message[e] != ' ')  
+		{
+			while (message[e+b] != ' ')
+			{
+ b++;
+				if (e+b>= lenth) break;
+			}
+ string x;
+ x.assign(message, e, b);
+ orderlist.push_back(x);
+ e = e + b; 
+ b =0;
+		}	
+	}
+}
